@@ -11,6 +11,15 @@ const server = http.createServer((req, res) => {
     if(req.url == "/joke" && req.method == "POST") {
         addJoke(req, res);
     }
+    if(req.url.startsWith("/like")){
+        like(req, res);
+    }
+    if(req.url.startsWith("/dislike")){
+        dislike(req, res);
+    }
+    if(req.url.startsWith("/reset")){
+        dislike(req, res);
+    }
 });
 server.listen(1488);
 
@@ -40,5 +49,52 @@ function addJoke(req, res) {
         let filePath = path.join(dataDir, fileName);
         fs.writeFileSync(filePath, JSON.stringify(joke));
         res.end("Joke added successfully");
-    })
+    });
+}
+function like(req, res){
+    const url = require('url');
+    const params = url.parse(req.url, true).query;
+    const id = params.id;
+    if(id){
+        let filePath = path.join(dataDir, id + ".json");
+        let file = fs.readFileSync(filePath, "utf-8");
+        let jokeJson = Buffer.from(file).toString();
+        let joke = JSON.parse(jokeJson);
+        joke.likes += 1;
+        fs.writeFileSync(filePath, JSON.stringify(joke));
+
+        
+    }
+    res.end();
+}
+
+function dislike(req, res){
+    const url = require('url');
+    const params = url.parse(req.url, true).query;
+    const id = params.id;
+    if(id){
+        let filePath = path.join(dataDir, id + ".json");
+        let file = fs.readFileSync(filePath, "utf-8");
+        let jokeJson = Buffer.from(file).toString();
+        let joke = JSON.parse(jokeJson);
+        joke.dislikes += 1;
+        fs.writeFileSync(filePath, JSON.stringify(joke));
+    }
+    res.end();
+}
+
+function dislike(req, res){
+    const url = require('url');
+    const params = url.parse(req.url, true).query;
+    const id = params.id;
+    if(id){
+        let filePath = path.join(dataDir, id + ".json");
+        let file = fs.readFileSync(filePath, "utf-8");
+        let jokeJson = Buffer.from(file).toString();
+        let joke = JSON.parse(jokeJson);
+        joke.dislikes = 0;
+        joke.likes = 0;
+        fs.writeFileSync(filePath, JSON.stringify(joke));
+    }
+    res.end();
 }
